@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simulasi Checksum, CRC, dan Hamming Code untuk komunikasi data.">
+  <title>Simulasi Koreksi Data Jaringan</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="background-grid" aria-hidden="true"></div>
+
+  <main class="app-shell">
+    <section id="halamanPembuka" class="page opening-page active" aria-labelledby="judulPembuka">
+      <div class="hero-card">
+        <span class="eyebrow">MINI PROJECT KOMUNIKASI DATA</span>
+        <h1 id="judulPembuka">Simulasi Sistem CRC, Checksum, dan Hamming Code</h1>
+        <p class="subtitle">Menyimulasikan proses Tx, Rx, deteksi error, dan koreksi satu bit secara interaktif</p>
+        <p class="authors">By <strong>Kalvin Eben Enjer Mendrofa</strong> & <strong>Dimas ikhwan Farel Sulendro</strong></p>
+        <button id="tombolLanjut" class="btn btn-primary" type="button">START</button>
+      </div>
+    </section>
+
+    <section id="halamanMenu" class="page" aria-labelledby="judulMenu">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">SISTEM DETEKSI ERROR</span>
+          <h2 id="judulMenu">Pilih Metode Simulasi</h2>
+        </div>
+        <button class="btn btn-ghost" data-target="halamanPembuka" type="button">Kembali</button>
+      </header>
+
+      <p class="intro-text">Pilih metode untuk memproses data pada sisi pengirim dan memeriksa data pada sisi penerima. Panjang data dapat menyesuaikan parameter metode.</p>
+
+      <div class="method-grid">
+        <article class="method-card">
+          <div class="method-icon">Σ</div>
+          <h3>Checksum</h3>
+          <p>Penjumlahan komplemen satu dengan end-around carry untuk mendeteksi perubahan data.</p>
+          <button class="btn btn-primary open-method" data-target="halamanChecksum" type="button">Mulai Simulasi</button>
+        </article>
+
+        <article class="method-card">
+          <div class="method-icon">÷</div>
+          <h3>CRC</h3>
+          <p>Pembagian modulo-2 dengan XOR untuk memperoleh FCS dan memeriksa remainder Rx.</p>
+          <button class="btn btn-primary open-method" data-target="halamanCRC" type="button">Mulai Simulasi</button>
+        </article>
+
+        <article class="method-card">
+          <div class="method-icon">H</div>
+          <h3>Hamming Code</h3>
+          <p>Bit paritas dinamis untuk mendeteksi dan mengoreksi satu kesalahan bit.</p>
+          <button class="btn btn-primary open-method" data-target="halamanHamming" type="button">Mulai Simulasi</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="halamanChecksum" class="page" aria-labelledby="judulChecksum">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">MODUL 1</span>
+          <h2 id="judulChecksum">Simulasi Checksum 1's Complement</h2>
+        </div>
+        <button class="btn btn-ghost" data-target="halamanMenu" type="button">Menu Utama</button>
+      </header>
+
+      <div class="workspace">
+        <form id="formChecksum" class="panel input-panel" novalidate>
+          <div class="panel-heading">
+            <h3>Input Checksum</h3>
+            <p>Semua blok wajib memiliki panjang bit yang sama.</p>
+          </div>
+
+          <div class="form-grid two-columns">
+            <label class="field">
+              <span>Jumlah Data Tx</span>
+              <input id="jumlahBlokChecksum" type="number" min="2" max="20" value="2" inputmode="numeric">
+            </label>
+            <label class="field">
+              <span>Panjang bit data</span>
+              <input id="panjangBlokChecksum" type="number" min="1" max="128" value="8" inputmode="numeric">
+            </label>
+          </div>
+
+          <button id="buatKolomChecksum" class="btn btn-secondary" type="button">Buat Kolom Data</button>
+          <div id="daftarInputChecksum" class="dynamic-inputs"></div>
+
+          <label class="field">
+            <span>Checksum Tx <small>(opsional)</small></span>
+            <input id="checksumTxInput" type="text" placeholder="Kosongkan untuk dihitung otomatis" autocomplete="off" spellcheck="false">
+          </label>
+
+          <label class="field">
+            <span>Data Rx <small>(opsional, tanpa spasi)</small></span>
+            <textarea id="dataRxChecksum" rows="3" placeholder="Kosongkan untuk menggunakan codeword Tx" spellcheck="false"></textarea>
+          </label>
+
+          <div id="errorChecksum" class="message error-message" role="alert" hidden></div>
+          <button class="btn btn-primary full-width" type="submit">Proses Checksum</button>
+        </form>
+
+        <section class="panel result-panel" aria-live="polite">
+          <div class="panel-heading">
+            <h3>Hasil Checksum</h3>
+            <p>Hasil perhitungan Tx dan pemeriksaan Rx akan tampil di sini.</p>
+          </div>
+          <div id="hasilChecksum" class="result-content empty-state">Belum ada data yang diproses.</div>
+        </section>
+      </div>
+    </section>
+
+    <section id="halamanCRC" class="page" aria-labelledby="judulCRC">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">MODUL 2</span>
+          <h2 id="judulCRC">Simulasi Cyclic Redundancy Check</h2>
+        </div>
+        <button class="btn btn-ghost" data-target="halamanMenu" type="button">Menu Utama</button>
+      </header>
+
+      <div class="workspace">
+        <form id="formCRC" class="panel input-panel" novalidate>
+          <div class="panel-heading">
+            <h3>Input CRC</h3>
+            <p>Generator harus diawali dan diakhiri bit 1.</p>
+          </div>
+
+          <label class="field">
+            <span>bit Data Tx </span>
+            <textarea id="dataTxCRC" rows="3" placeholder="Contoh: 1101011011" spellcheck="false">1101011011</textarea>
+          </label>
+
+          <label class="field">
+            <span>Pola</span>
+            <input id="generatorCRC" type="text" value="10011" placeholder="Contoh: 10011" autocomplete="off" spellcheck="false">
+          </label>
+
+          <label class="field">
+            <span>FCS/CRC Tx <small>(opsional)</small></span>
+            <input id="fcsCRCInput" type="text" placeholder="Kosongkan untuk dihitung otomatis" autocomplete="off" spellcheck="false">
+          </label>
+
+          <label class="field">
+            <span>Data yang diterima (Rx)<small>(opsional)</small></span>
+            <textarea id="dataRxCRC" rows="3" placeholder="Kosongkan untuk menggunakan codeword Tx" spellcheck="false"></textarea>
+          </label>
+
+          <div id="errorCRC" class="message error-message" role="alert" hidden></div>
+          <button class="btn btn-primary full-width" type="submit">Proses CRC</button>
+        </form>
+
+        <section class="panel result-panel" aria-live="polite">
+          <div class="panel-heading">
+            <h3>Hasil CRC</h3>
+            <p>Tahapan pembagian XOR dan remainder akan ditampilkan.</p>
+          </div>
+          <div id="hasilCRC" class="result-content empty-state">Belum ada data yang diproses.</div>
+        </section>
+      </div>
+    </section>
+
+    <section id="halamanHamming" class="page" aria-labelledby="judulHamming">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">MODUL 3</span>
+          <h2 id="judulHamming">Simulasi Hamming Code Dinamis</h2>
+        </div>
+        <button class="btn btn-ghost" data-target="halamanMenu" type="button">Menu Utama</button>
+      </header>
+
+      <div class="workspace">
+        <form id="formHamming" class="panel input-panel" novalidate>
+          <div class="panel-heading">
+            <h3>Input Hamming Code</h3>
+            <p>Sistem menggunakan paritas genap dan menentukan jumlah bit paritas secara otomatis.</p>
+          </div>
+
+          <label class="field">
+            <span>Bit data Tx</span>
+            <textarea id="dataTxHamming" rows="3" placeholder="Contoh: 10110101" spellcheck="false">10110101</textarea>
+          </label>
+
+          <label class="field">
+            <span>Hamming code Tx <small>(opsional)</small></span>
+            <textarea id="codewordHammingInput" rows="3" placeholder="Kosongkan untuk dibentuk otomatis" spellcheck="false"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Data Rx <small>(opsional)</small></span>
+            <textarea id="dataRxHamming" rows="3" placeholder="Kosongkan untuk menggunakan Hamming code Tx" spellcheck="false"></textarea>
+          </label>
+
+          <div id="errorHamming" class="message error-message" role="alert" hidden></div>
+          <button class="btn btn-primary full-width" type="submit">Proses Hamming Code</button>
+        </form>
+
+        <section class="panel result-panel" aria-live="polite">
+          <div class="panel-heading">
+            <h3>Hasil Hamming Code</h3>
+            <p>Posisi paritas, syndrome, dan hasil koreksi akan ditampilkan.</p>
+          </div>
+          <div id="hasilHamming" class="result-content empty-state">Belum ada data yang diproses.</div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Simulasi Komunikasi Data • Kalvin Eben Enjer Mendrofa & Dimas ikhwan Farel Sulendro</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
